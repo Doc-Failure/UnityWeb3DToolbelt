@@ -18,6 +18,11 @@ using Newtonsoft.Json;
 
 public class UnityWeb3DToolbelt : EditorWindow
 {
+
+    //string[] chain = { "Aurora testnet", "BSC testnet", "Polygon testnet (Mumbai)", "Polkadot testnet", "Avalanche testnet (FUJI)" };
+
+
+    ENetworks index;
     string privateKey;
     string account;
 
@@ -31,6 +36,9 @@ public class UnityWeb3DToolbelt : EditorWindow
     string tokenSymbol;
     bool includeWalletLoginWidgetInGame = true;
     Texture2D objectToDeploy;
+
+    Networks networksList = new Networks();
+
     byte[] rawData;
     [MenuItem("Web3D Toolbelt Tools/NFT Deployer")]
     public static void ShowWindow()
@@ -55,6 +63,13 @@ public class UnityWeb3DToolbelt : EditorWindow
 
     void OnGUI()
     {
+        //AppOptions options = AppOptions.LoadFromJsonConfig("networks.json");
+        //Debug.Log(options[0]);
+        index = (ENetworks)EditorGUILayout.EnumPopup("Deploy to:", index);
+        GUILayout.Label("");
+
+        //Debug.Log("NFT reedemer: " + networksList.GetNetwork(index).GetChainID());
+
         if (deployContract == null)
             showMeTheNFT = false;
         GUILayout.Label("Wallet Settings", EditorStyles.boldLabel);
