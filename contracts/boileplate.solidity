@@ -5,7 +5,7 @@ import "https://raw.githubusercontent.com/smartcontractkit/chainlink/9ae2b4aafa2
 
 contract AdvancedCollectible is ERC721, VRFConsumerBase {
     uint256 public tokenCounter;
-    enum Breed{PUG, SHIBA_INU, ST_BERNARD}
+    enum $PH_ENUM_NAME {$PH_ENUM_LIST}
     // add other things
     mapping(bytes32 => address) public requestIdToSender;
     mapping(bytes32 => string) public requestIdToTokenURI;
@@ -22,7 +22,7 @@ contract AdvancedCollectible is ERC721, VRFConsumerBase {
     constructor(address _VRFCoordinator, address _LinkToken, bytes32 _keyhash)
     public 
     VRFConsumerBase(_VRFCoordinator, _LinkToken)
-    ERC721("Dogie", "DOG")
+    ERC721($PH_TOKEN_NAME, $PH_TOKEN_SYMBOL)
     {
         tokenCounter = 0;
         keyHash = _keyhash;
