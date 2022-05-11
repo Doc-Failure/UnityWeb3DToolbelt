@@ -1,60 +1,74 @@
-pragma solidity 0.6.6;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.6.6;
 
-import "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/release-v3.4/contracts/token/ERC721/ERC721.sol";
-import "https://raw.githubusercontent.com/smartcontractkit/chainlink/9ae2b4aafa22d60bde18337d502893f36748605a/contracts/src/v0.6/VRFConsumerBase.sol";
+import "@openzeppelin/contracts@3.2.0/token/ERC1155/ERC1155.sol";
+import "@chainlink/contracts/src/v0.6/VRFConsumerBase.sol";
+//import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AdvancedCollectible is ERC721, VRFConsumerBase {
-    uint256 public tokenCounter;
-    enum $PH_ENUM_NAME {$PH_ENUM_LIST}
-    // add other things
-    mapping(bytes32 => address) public requestIdToSender;
-    mapping(bytes32 => string) public requestIdToTokenURI;
-    mapping(uint256 => Breed) public tokenIdToBreed;
-    mapping(bytes32 => uint256) public requestIdToTokenId;
-    event RequestedCollectible(bytes32 indexed requestId); 
-    // New event from the video!
-    event ReturnedCollectible(bytes32 indexed requestId, uint256 randomNumber);
-
-
+contract NFTContract is ERC1155, VRFConsumerBase {
+    string public name = "Random NFT Game Collection";
+    using SafeMath for uint256;
     bytes32 internal keyHash;
     uint256 internal fee;
-    
+    uint256 public randomResult;
+    address public VRFCoordinator;
+    // rinkeby: 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B
+    address public LinkToken;
+    // rinkeby: 0x01BE23585060835E02B77ef475b0Cc51aA1e0709a
+
+    uint256 public constant GOLD = 0;
+    uint256 public constant SILVER = 1;
+    uint256 public constant SWORD = 2;
+    uint256 public constant SHIELD = 3;
+
+    mapping(bytes32 => uint256) requestToItem;
+    mapping(bytes32 => address) requestToSender;
+    mapping(bytes32 => uint256) requestToTokenId;
+
+    /**
+     * Constructor inherits VRFConsumerBase
+     *
+     * Network: Rinkeby
+     * Chainlink VRF Coordinator address: 0xb3dCcb4Cf7a26f6cf6B120Cf5A73875B7BBc655B
+     * LINK token address:                0x01BE23585060835E02B77ef475b0Cc51aA1e0709
+     * Key Hash: 0x2ed0feb3e7fd2022120aa84fab1945545a9f2ffc9076fd6156fa96eaff4c1311
+     */
     constructor(address _VRFCoordinator, address _LinkToken, bytes32 _keyhash)
-    public 
-    VRFConsumerBase(_VRFCoordinator, _LinkToken)
-    ERC721($PH_TOKEN_NAME, $PH_TOKEN_SYMBOL)
-    {
-        tokenCounter = 0;
+        public
+        VRFConsumerBase(_VRFCoordinator, _LinkToken)
+        ERC1155("https://bafybeigihmqwd3n6lklsmrq4jmysbd4ups5pskekzv533ox6vmnjnzclqi.ipfs.nftstorage.link/{id}-PUG.json")
+        
+    {   
+        _mint(address(this), GOLD, 0, "");
+        _mint(address(this), SILVER, 0, "");
+        _mint(address(this), SWORD, 0, "");
+        _mint(address(this), SHIELD, 0, "");
+        VRFCoordinator = _VRFCoordinator;
+        LinkToken = _LinkToken;
         keyHash = _keyhash;
-        fee = 0.1 * 10 ** 18;
+        fee = 0.1 * 10**18; // 0.1 LINK
     }
 
-    function createCollectible(string memory tokenURI) 
-        public returns (bytes32){
-            bytes32 requestId = requestRandomness(keyHash, fee);
-            requestIdToSender[requestId] = msg.sender;
-            requestIdToTokenURI[requestId] = tokenURI;
-            emit RequestedCollectible(requestId);
-    }
-
-    function fulfillRandomness(bytes32 requestId, uint256 randomNumber) internal override {
-        address dogOwner = requestIdToSender[requestId];
-        string memory tokenURI = requestIdToTokenURI[requestId];
-        uint256 newItemId = tokenCounter;
-        _safeMint(dogOwner, newItemId);
-        _setTokenURI(newItemId, tokenURI);
-        Breed breed = Breed(randomNumber % 3); 
-        tokenIdToBreed[newItemId] = breed;
-        requestIdToTokenId[requestId] = newItemId;
-        tokenCounter = tokenCounter + 1;
-        emit ReturnedCollectible(requestId, randomNumber);
-    }
-
-    function setTokenURI(uint256 tokenId, string memory _tokenURI) public {
+    function redeemResources( uint256 itemId ) public returns (bytes32) {
         require(
-            _isApprovedOrOwner(_msgSender(), tokenId),
-            "ERC721: transfer caller is not owner nor approved"
+            LINK.balanceOf(address(this)) >= fee,
+            "Not enough LINK - fill contract with faucet"
         );
-        _setTokenURI(tokenId, _tokenURI);
+        bytes32 requestId = requestRandomness(keyHash, fee);
+        requestToItem[requestId] = itemId;
+        requestToSender[requestId] = msg.sender;
+        return requestId;
+    }
+
+    function fulfillRandomness(bytes32 requestId, uint256 randomNumber)
+        internal
+        override
+    {
+        //we have a 50% chances of receive some resources
+        randomResult = randomNumber%2;
+        //if we mined some resources we receive 5 of them
+        uint256 quantity = randomResult>0?5:0;
+        
+        _mint(requestToSender[requestId], requestToItem[requestId], 10, "");
     }
 }
