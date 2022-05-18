@@ -1,1 +1,1 @@
-enum ENetworks { AuroraTestnet, PolygonTestnet, BscTestnet, AvalancheTestnet };
+enum ENetworks { AuroraTestnet, PolygonTestnet, BscTestnet, AvalancheTestnet, RynkebyTestnet };
