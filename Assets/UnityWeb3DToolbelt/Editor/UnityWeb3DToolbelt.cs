@@ -14,7 +14,7 @@ using UnityEngine.Networking;
 using System.IO;
 using Newtonsoft.Json;
 
-// using Unity.EditorCoroutines.Editor;
+using Unity.EditorCoroutines.Editor;
 
 public class UnityWeb3DToolbelt : EditorWindow
 {
@@ -25,8 +25,8 @@ public class UnityWeb3DToolbelt : EditorWindow
     ENetworks index;
     string privateKey;
     string account;
-
-    NFTDeployment deployContract;
+    /* 
+        NFTDeployment deployContract; */
 
     GameObject redeemObjTrigger;
     Texture2D texture;
@@ -36,6 +36,7 @@ public class UnityWeb3DToolbelt : EditorWindow
     string tokenSymbol;
     bool includeWalletLoginWidgetInGame = true;
     Texture2D objectToDeploy;
+    GameObject objtdeploy;
 
     Networks networksList = new Networks();
 
@@ -70,8 +71,8 @@ public class UnityWeb3DToolbelt : EditorWindow
 
         //Debug.Log("NFT reedemer: " + networksList.GetNetwork(index).GetChainID());
 
-        if (deployContract == null)
-            showMeTheNFT = false;
+        /*   if (deployContract == null)
+              showMeTheNFT = false; */
         GUILayout.Label("Wallet Settings", EditorStyles.boldLabel);
         privateKey = EditorGUILayout.TextField("Private Key", privateKey);
         account = EditorGUILayout.TextField("Account Address", account);
@@ -87,37 +88,37 @@ public class UnityWeb3DToolbelt : EditorWindow
         tokenName = EditorGUILayout.TextField("NFT Name", tokenName);
         tokenSymbol = EditorGUILayout.TextField("NFT Symbol", tokenSymbol);
         objectToDeploy = EditorGUILayout.ObjectField("Object to deploy", objectToDeploy, typeof(Texture2D), true, GUILayout.Height(EditorGUIUtility.singleLineHeight)) as Texture2D;
+        objtdeploy = EditorGUILayout.ObjectField("Object to aaaaaa", objtdeploy, typeof(GameObject), true, GUILayout.Height(EditorGUIUtility.singleLineHeight)) as GameObject;
 
         GUILayout.EndVertical();
 
         if (GUILayout.Button("Deploy as NFT"))
         {
             Debug.Log("Deploy as NFT");
-            // this.StartCoroutine(DeployObject());
+            this.StartCoroutine(DeployNFT());
         }
         GUILayout.Label("");
-        if (deployContract != null && GUILayout.Button("Retrieve NFT"))
-        {
-            Debug.Log("RetrieveImage image on EdgeNode");
-            // this.StartCoroutine(RetrieveImage());
-        }
-        if (deployContract != null && showMeTheNFT)
-        {
-            texture = new Texture2D(100, 100);
-            //var rawData = System.IO.File.ReadAllBytes("Assets/aaa.png");
-            texture.LoadImage(rawData);
-            GUILayout.Label("NFT preview", EditorStyles.boldLabel);
-            GUILayout.Label(texture);
-        }
-        if (deployContract != null)
-        {
-            redeemObjTrigger = EditorGUILayout.ObjectField("Redeem function trigger", redeemObjTrigger, typeof(GameObject), true, GUILayout.Height(EditorGUIUtility.singleLineHeight)) as GameObject;
-            if (GUILayout.Button("Bind 'NFT Redeem' action to a game object"))
-            {
-                NFTReedemer();
-            }
-
-        }
+        /*   if (deployContract != null && GUILayout.Button("Retrieve NFT"))
+          {
+              Debug.Log("RetrieveImage image on EdgeNode");
+              // this.StartCoroutine(RetrieveImage());
+          }
+          if (deployContract != null && showMeTheNFT)
+          {
+              texture = new Texture2D(100, 100);
+              //var rawData = System.IO.File.ReadAllBytes("Assets/aaa.png");
+              texture.LoadImage(rawData);
+              GUILayout.Label("NFT preview", EditorStyles.boldLabel);
+              GUILayout.Label(texture);
+          }
+          if (deployContract != null)
+          {
+              redeemObjTrigger = EditorGUILayout.ObjectField("Redeem function trigger", redeemObjTrigger, typeof(GameObject), true, GUILayout.Height(EditorGUIUtility.singleLineHeight)) as GameObject;
+              if (GUILayout.Button("Bind 'NFT Redeem' action to a game object"))
+              {
+                  NFTReedemer();
+              }
+          } */
 
     }
 
@@ -129,122 +130,137 @@ public class UnityWeb3DToolbelt : EditorWindow
 
 
 
-    private IEnumerator RetrieveImage()
+    /*  private IEnumerator RetrieveImage()
+     {
+         Debug.Log("deployContract.TokenUri: " + deployContract.TokenUri);
+
+         UnityWebRequest request = UnityWebRequestTexture.GetTexture(deployContract.TokenUri);
+         yield return request.SendWebRequest();
+         if (request.isNetworkError || request.isHttpError)
+             Debug.Log(request.error);
+         else
+         {
+             rawData = ((DownloadHandlerTexture)request.downloadHandler).data;
+         } */
+    /* var request = new UnityWebRequest("http://localhost:19888/rpc", "POST");
+string bodyJsonString = "{\"jsonrpc\":\"2.0\",\"method\":\"edgestore.GetFile\",\"params\":[{\"key\": \"0xdacc9a23035a458f21aa0cb51189d715cb5c43d7ff4c0227cca5c25eeef3d5b4\"}],\"id\":1}";
+    byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
+    request.uploadHandler = (UploadHandler) new UploadHandlerRaw(bodyRaw);
+    request.downloadHandler = (DownloadHandler) new DownloadHandlerBuffer();
+    request.SetRequestHeader("Content-Type", "application/json");
+    yield return request.SendWebRequest();
+    Debug.Log("Status Code: " + request.responseCode);*/
+    /*       showMeTheNFT = true;
+      } */
+
+
+
+    /* private IEnumerator DeployObject()
     {
-        Debug.Log("deployContract.TokenUri: " + deployContract.TokenUri);
+        var request = new UnityWebRequest("https://api.nft.storage/upload", "POST");
+ */
+    /*   string filePath = Path.Combine(Directory.GetCurrentDirectory(), AssetDatabase.GetAssetPath(objectToDeploy));
+      string bodyJsonString = "{\"jsonrpc\":\"2.0\",\"method\":\"edgestore.PutFile\",\"params\":[{\"path\": \"" + filePath + "\"}],\"id\":2}"; */
 
-        UnityWebRequest request = UnityWebRequestTexture.GetTexture(deployContract.TokenUri);
-        yield return request.SendWebRequest();
-        if (request.isNetworkError || request.isHttpError)
-            Debug.Log(request.error);
-        else
-        {
-            rawData = ((DownloadHandlerTexture)request.downloadHandler).data;
-        }
-        /* var request = new UnityWebRequest("http://localhost:19888/rpc", "POST");
-	string bodyJsonString = "{\"jsonrpc\":\"2.0\",\"method\":\"edgestore.GetFile\",\"params\":[{\"key\": \"0xdacc9a23035a458f21aa0cb51189d715cb5c43d7ff4c0227cca5c25eeef3d5b4\"}],\"id\":1}";
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
-        request.uploadHandler = (UploadHandler) new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = (DownloadHandler) new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-        yield return request.SendWebRequest();
-        Debug.Log("Status Code: " + request.responseCode);*/
-        showMeTheNFT = true;
-    }
+    //byte[] bodyRaw = objectToDeploy.GetRawTextureData();
+    //string filePath = Path.Combine(Directory.GetCurrentDirectory(), AssetDatabase.GetAssetPath(objectToDeploy));
+    //byte[] bodyRaw = Encoding.UTF8.GetBytes(objectToDeploy.GetRawTextureData());
+    /*   string filePath = Path.Combine(Directory.GetCurrentDirectory(), AssetDatabase.GetAssetPath(objectToDeploy));
+      request.uploadHandler = (UploadHandler)new UploadHandlerRaw(filePath);
+      request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+      request.SetRequestHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEI5RTEyMGFhRjQyMWNGNzJiNzAxOEU3ZUFlRDljNWYwOTBERDYxOGQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1MjI2MjQ3NDY0MSwibmFtZSI6Ik5GVC1VUCJ9.e8LUK0K_cabscL1gEkrgF7dekuDzP7Hn3QxZjPFHHPM");
+      request.SetRequestHeader("accept", "application/json");
+      request.SetRequestHeader("Content-Type", "multipart/form-data");
+      yield return request.SendWebRequest();
 
+      var data = request.downloadHandler.text;
+      Debug.Log(data.ToString()); */
 
+    //asdawer213edasd23erdasxcddasd1234awd
 
-    private IEnumerator DeployObject()
-    {
-        var request = new UnityWebRequest("http://localhost:19888/rpc", "POST");
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), AssetDatabase.GetAssetPath(objectToDeploy));
-        string bodyJsonString = "{\"jsonrpc\":\"2.0\",\"method\":\"edgestore.PutFile\",\"params\":[{\"path\": \"" + filePath + "\"}],\"id\":2}";
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
-        request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-        yield return request.SendWebRequest();
+    //Loado immagini da Chain e interagisco in gioco x esempio chainlink.
+    /* 
+            dynamic objects = JsonConvert.DeserializeObject(data); // parse as array  
+            string tokenUri = "http://localhost:8080/api/v1/file?key=" + objects.result.key + "&relpath=" + objects.result.relpath;
 
-        var data = request.downloadHandler.text;
-        Debug.Log("data: " + data);
+            var url = "https://eth-rpc-api-testnet.thetatoken.org/rpc";
+     */
+    //https://api.nft.storage
 
-        dynamic objects = JsonConvert.DeserializeObject(data); // parse as array  
-        string tokenUri = "http://localhost:8080/api/v1/file?key=" + objects.result.key + "&relpath=" + objects.result.relpath;
-        /*  if(objectToDeploy == null)
-            {
-                Debug.LogError("Error: Please choose wich object you want to deploy as NFT.");
-                return;
-            } */
-        var url = "https://eth-rpc-api-testnet.thetatoken.org/rpc";
-        //initialising the transaction request sender
-        var transactionRequest = new TransactionSignedUnityRequest(url, privateKey, 365);
-        // transactionRequest.UseLegacyAsDefault = true;
+    /*   } */
 
-
-        deployContract = new NFTDeployment()
-        {
-            TokenUri = tokenUri,
-            TokenName = tokenName,
-            TokenSymbol = tokenSymbol
-        };
-
-        //deploy the contract and True indicates we want to estimate the gas
-        yield return transactionRequest.SignAndSendDeploymentContractTransaction<NFTDeploymentBase>(deployContract);
-
-        if (transactionRequest.Exception != null)
-        {
-            Debug.Log(transactionRequest.Exception.Message);
-            yield break;
-        }
-
-        var transactionHash = transactionRequest.Result;
-
-        Debug.Log("Deployment transaction hash:" + transactionHash);
-
-        //create a poll to get the receipt when mined
-        var transactionReceiptPolling = new TransactionReceiptPollingRequest(url);
-        //checking every 2 seconds for the receipt
-        yield return transactionReceiptPolling.PollForReceipt(transactionHash, 2);
-        var deploymentReceipt = transactionReceiptPolling.Result;
-
-        Debug.Log("Deployment contract address:" + deploymentReceipt.ContractAddress);
-
-        /*  if (objectBaseName == string.Empty) {
-                Debug.LogError("Error: Please enter a base name for the object.");
-                return;
-            } */
-        /* 
-                Vector3 spawnPos = new Vector3(spawnCircle.x, 0f, spawnCircle.y);
-
-                GameObject newObject = Instantiate(objectToDeploy, spawnPos, Quaternion.identity); */
-    }
-
-
-
-
-    public partial class NFTDeployment : NFTDeploymentBase
-    {
-        public NFTDeployment() : base(BYTECODE) { }
-
-        public NFTDeployment(string byteCode) : base(byteCode) { }
-    }
-
-    public class NFTDeploymentBase : ContractDeploymentMessage
+    //passare da DeployObject a DeployNFT
+    private IEnumerator DeployNFT()
     {
 
-        public static string BYTECODE = @"608.......BYTECODE......736574206f66206e6f6e6578697374656e7420746f6b656e";
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("accept", "application/json");
+        headers.Add("Authorization", "Bearer TBD");
+        //headers.Add("Content-Type", "multipart/form-data");
+        //WWW www = new WWW("https://example.com", null, headers);
+        //string filePath = Path.Combine(Directory.GetCurrentDirectory(), AssetDatabase.GetAssetPath(objectToDeploy));
+        WWWForm form = new WWWForm();
+        byte[] bodyRaw = objectToDeploy.GetRawTextureData();
+        string utf8String = Encoding.UTF8.GetBytes(bodyRaw);
+        var bytes = Encoding.ASCII.GetBytes(utf8String);
+        //byte[] textureBytes = objectToDeploy.EncodeToPNG());
+        form.AddBinaryData("file", bytes, "foto_profilo.jpeg", "image/jpeg");
+        //form.AddBinaryData("file", bytes);
+        //form.AddField("file", @"/Users/conve/Documents/foto_profilo.jpeg");
+        //this.bytes = Encoding.UTF8.GetBytes( JSON.JsonEncode( data ) );
+
+        //UnityWebRequest www = UnityWebRequest.Post("https://api.nft.storage/upload", form, headers);
+        //byte[] rawData = form.data;
+        //byte[] bodyRaw = objectToDeploy.GetRawTextureData();
+        //string filePath = Path.Combine(Directory.GetCurrentDirectory(), AssetDatabase.GetAssetPath(objectToDeploy));
+        //byte[] bodyRaw = Encoding.UTF8.GetBytes(objectToDeploy.GetRawTextureData());
+        //string filePath = Path.Combine(Directory.GetCurrentDirectory(), AssetDatabase.GetAssetPath(objectToDeploy));
+        //request.uploadHandler = (UploadHandler)new UploadHandlerRaw(rawData);
+        //request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+
+
+        WWW www = new WWW("https://api.nft.storage/upload", form.data, headers);
+        yield return www;
+        Debug.Log(www.text);
 
 
 
-        public NFTDeploymentBase() : base(BYTECODE) { }
 
-        public NFTDeploymentBase(string byteCode) : base(byteCode) { }
 
-        [Parameter("string", "name", 1)]
-        public string TokenName { get; set; }
-        [Parameter("string", "symbol", 2)]
-        public string TokenSymbol { get; set; }
-        [Parameter("string", "uri", 3)]
-        public string TokenUri { get; set; }
+
+        /*  List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
+         formData.Add(new MultipartFormDataSection("file", "@/Users/conve/Documents/foto_profilo.jpeg")); */
+        //("file=;type=image/jpeg"));
+        //List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
+        //formData.Add(new MultipartFormDataSection("file=@/Users/conve/Documents/foto_profilo.jpeg;type=image/jpeg"));
+        //formData.Add(new MultipartFormFileSection("my file data", "myfile.txt"));
+        /* string filePath = Path.Combine(Directory.GetCurrentDirectory(), AssetDatabase.GetAssetPath(objectToDeploy)); */
+        //form.AddField("file", "@CV-Europass-20190513-Convertino-EN.pdf;type=application/pdf");
+        //var bytes = System.Text.Encoding.UTF8.GetBytes();
+        //-F 'file=@CV-Europass-20190513-Convertino-EN.pdf;type=application/pdf' \
+        //string bodyJsonString = "'file=@/Users/conve/Documents/foto_profilo.jpeg;type=images/*'";
+        //UnityWebRequest www = UnityWebRequest("https://api.nft.storage/upload", "POST");
+        /*   UnityWebRequest www = UnityWebRequest.Post("https://api.nft.storage/upload", formData); */
+
+        //string bodyJsonString = "file=@/Users/conve/Documents/foto_profilo.jpeg;type=image/jpeg";
+        /*  byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
+         www.uploadHandler = (UploadHandler)new UploadHandlerRaw(form); */
+
+        /*   www.SetRequestHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEI5RTEyMGFhRjQyMWNGNzJiNzAxOEU3ZUFlRDljNWYwOTBERDYxOGQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1Mjk1ODY0MTE3NSwibmFtZSI6IlVuaXR5V2ViM0QifQ._SsnFEBT6Z1WjLQX7wPaD9dniy5LwhuBsfndo15ROu0");
+          www.SetRequestHeader("accept", "application/json");
+          www.SetRequestHeader("Content-Type", "multipart/form-data");
+          //www.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+          yield return www.SendWebRequest();
+
+          Debug.Log("res: " + www.result);
+          if (www.result != UnityWebRequest.Result.Success)
+          {
+              Debug.Log("error: " + www.error);
+          }
+          else
+          {
+              Debug.Log("Form upload complete!");
+              Debug.Log("result: " + www.result);
+          } */
     }
 }
