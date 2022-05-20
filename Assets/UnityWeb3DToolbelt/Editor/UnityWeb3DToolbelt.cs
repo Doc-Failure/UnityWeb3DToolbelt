@@ -28,6 +28,7 @@ public class UnityWeb3DToolbelt : EditorWindow
     /* 
         NFTDeployment deployContract; */
 
+    string NFTStorageBearerApi;
     GameObject redeemObjTrigger;
     Texture2D texture;
     bool showMeTheNFT = false;
@@ -37,6 +38,7 @@ public class UnityWeb3DToolbelt : EditorWindow
     bool includeWalletLoginWidgetInGame = true;
     Texture2D objectToDeploy;
     Texture2D objtdeploy;
+    List<ERC1155Metadata> tokenList = new List<ERC1155Metadata>();
 
     Networks networksList = new Networks();
 
@@ -78,17 +80,47 @@ public class UnityWeb3DToolbelt : EditorWindow
         account = EditorGUILayout.TextField("Account Address", account);
 
         GUILayout.Label("");
-
-        GUILayout.Label("In Game Features", EditorStyles.boldLabel);
-        includeWalletLoginWidgetInGame = EditorGUILayout.Toggle("Wallet Login Widget", includeWalletLoginWidgetInGame);
+        GUILayout.Label("NFT.storage", EditorStyles.boldLabel);
+        NFTStorageBearerApi = EditorGUILayout.TextField("Bearer API Key", NFTStorageBearerApi);
 
         GUILayout.BeginVertical();
         GUILayout.Label("");
-        GUILayout.Label("NFT Settings", EditorStyles.boldLabel);
-        tokenName = EditorGUILayout.TextField("NFT Name", tokenName);
-        tokenSymbol = EditorGUILayout.TextField("NFT Symbol", tokenSymbol);
-        objectToDeploy = EditorGUILayout.ObjectField("Object to deploy", objectToDeploy, typeof(Texture2D), true, GUILayout.Height(EditorGUIUtility.singleLineHeight)) as Texture2D;
-        objtdeploy = EditorGUILayout.ObjectField("Object to aaaaaa", objtdeploy, typeof(Texture2D), true, GUILayout.Height(EditorGUIUtility.singleLineHeight)) as Texture2D;
+        GUILayout.Label("NFT Builder", EditorStyles.boldLabel);
+
+        if (GUILayout.Button("Add Asset", GUILayout.ExpandWidth(false)))
+        {
+            Debug.Log("Asset Added");
+            tokenList.Add(new ERC1155Metadata());
+        }
+        GUILayout.Label("");
+        for (int i = 0; i < tokenList.Count; i++)
+        {
+            tokenList[i].name = EditorGUILayout.TextField("Token name", tokenList[i].name);
+            tokenList[i].description = EditorGUILayout.TextField("Token description", tokenList[i].description);
+            tokenList[i].image = EditorGUILayout.ObjectField("Token Image", tokenList[i].image, typeof(Texture2D), true, GUILayout.Height(EditorGUIUtility.singleLineHeight)) as Texture2D;
+            GUILayout.Label("Attributes");
+            /*  if (GUILayout.Button("Add Attribute", GUILayout.ExpandWidth(false)))
+             {
+                 Debug.Log("Attribute Added");
+                 tokenList[i].attributes.Add("string", "string");
+             } */
+            string stringToEdit = "";
+            stringToEdit = GUILayout.TextArea(stringToEdit, 200);
+            /* foreach (KeyValuePair<string, string> entry in tokenList[i].attributes)
+            {
+                GUILayout.Label("Attributes Name");
+                tokenList[i].attributes.name = EditorGUILayout.TextField("Attributes name", tokenList[i].attributes.name);
+                GUILayout.Label("Attributes Value");
+                /* tokenList[i].attributes.values = EditorGUILayout.TextField("Attributes Value", tokenList[i].attributes.values);
+            } */
+            if (GUILayout.Button("Delete Asset", GUILayout.ExpandWidth(false)))
+            {
+                Debug.Log("Asset Deleted");
+                tokenList.RemoveAt(i);
+            }
+            GUILayout.Label("");
+
+        }
 
         GUILayout.EndVertical();
 
@@ -98,27 +130,8 @@ public class UnityWeb3DToolbelt : EditorWindow
             this.StartCoroutine(DeployNFT());
         }
         GUILayout.Label("");
-        /*   if (deployContract != null && GUILayout.Button("Retrieve NFT"))
-          {
-              Debug.Log("RetrieveImage image on EdgeNode");
-              // this.StartCoroutine(RetrieveImage());
-          }
-          if (deployContract != null && showMeTheNFT)
-          {
-              texture = new Texture2D(100, 100);
-              //var rawData = System.IO.File.ReadAllBytes("Assets/aaa.png");
-              texture.LoadImage(rawData);
-              GUILayout.Label("NFT preview", EditorStyles.boldLabel);
-              GUILayout.Label(texture);
-          }
-          if (deployContract != null)
-          {
-              redeemObjTrigger = EditorGUILayout.ObjectField("Redeem function trigger", redeemObjTrigger, typeof(GameObject), true, GUILayout.Height(EditorGUIUtility.singleLineHeight)) as GameObject;
-              if (GUILayout.Button("Bind 'NFT Redeem' action to a game object"))
-              {
-                  NFTReedemer();
-              }
-          } */
+        GUILayout.Label("In Game Features", EditorStyles.boldLabel);
+        includeWalletLoginWidgetInGame = EditorGUILayout.Toggle("Wallet Login Widget", includeWalletLoginWidgetInGame);
 
     }
 
@@ -130,11 +143,6 @@ public class UnityWeb3DToolbelt : EditorWindow
     //passare da DeployObject a DeployNFT
     private IEnumerator DeployNFT()
     {
-
-        Dictionary<string, string> headers = new Dictionary<string, string>();
-        headers.Add("accept", "application/json");
-        headers.Add("Authorization", "Bearer TBD");
-
         var bytes = objectToDeploy.EncodeToPNG();
         var bytes2 = objtdeploy.EncodeToPNG();
 
@@ -143,7 +151,7 @@ public class UnityWeb3DToolbelt : EditorWindow
         form.AddBinaryData("file", bytes2, "aaaa.png", "image/png");
 
         UnityWebRequest www = UnityWebRequest.Post("https://api.nft.storage/upload", form);
-        www.SetRequestHeader("Authorization", "Bearer TBD");
+        www.SetRequestHeader("Authorization", "Bearer " + NFTStorageBearerApi);
         www.SetRequestHeader("accept", "application/json");
         yield return www.SendWebRequest();
 
