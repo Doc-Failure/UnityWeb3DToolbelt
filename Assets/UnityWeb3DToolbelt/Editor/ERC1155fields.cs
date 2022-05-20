@@ -7,7 +7,7 @@ public class ERC1155fields
     String name;
     String description;
     String image;
-    attributes;
+    KeyValuePair<TKey, TValue> attributes;
 
     public ERC1155fields(String networkName, String rpcUrl, int chainID, String symbol, String explorer)
     {
