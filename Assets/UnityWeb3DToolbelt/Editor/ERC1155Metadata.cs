@@ -10,8 +10,11 @@ public class ERC1155Metadata
 {
     public string name;
     public string description;
-    public string imageUri;
     public Texture2D image;
     public string attributes;
+
+
+    public ERC1155Metadata()
+    { this.attributes = "{ }"; }
 
 }
