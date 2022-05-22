@@ -43,6 +43,8 @@ public class UnityWeb3DToolbelt : EditorWindow
 
 
     List<ERC1155Metadata> tokenList = new List<ERC1155Metadata>();
+    private string ERC1155ImagesCID = "";
+    private string ERC1155CID = "";
 
     Networks networksList = new Networks();
 
@@ -114,6 +116,7 @@ public class UnityWeb3DToolbelt : EditorWindow
         {
             Debug.Log("Deploy as NFT");
             this.StartCoroutine(ImagesDeployer());
+            this.StartCoroutine(MetadataDeployer());
             //DeployToken();
         }
 
@@ -139,7 +142,7 @@ public class UnityWeb3DToolbelt : EditorWindow
         {
             Texture2D decopmpresseTex = DeCompress(tokenList[i].image);
             var bytes = decopmpresseTex.EncodeToPNG();
-            form.AddBinaryData("file", bytes, "imageId" + i + ".png", "image/png");
+            form.AddBinaryData("file", bytes, "image_ID_" + i + ".png", "image/png");
         }
 
         UnityWebRequest www = UnityWebRequest.Post("https://api.nft.storage/upload", form);
@@ -153,12 +156,46 @@ public class UnityWeb3DToolbelt : EditorWindow
         }
         else
         {
-            Debug.Log(www.result);
+            Debug.Log("images");
             Debug.Log(www.downloadHandler.text);
-            //dynamic objects = JsonConvert.DeserializeObject(www.downloadHandler.text); // parse as array  
-            //Debug.Log(objects.value.cid);
+            dynamic objects = JsonConvert.DeserializeObject<dynamic>(www.downloadHandler.text);
+            ERC1155ImagesCID = objects["value"];
+            Debug.Log(ERC1155ImagesCID);
+        }
+    }
 
+    private IEnumerator MetadataDeployer()
+    {
+        Debug.Log("MetadataDeployer Started!");
+        WWWForm form = new WWWForm();
 
+        //'meta=\'{"image":null,"name":"Storing the Worlds Most Valuable Virtual Assets with NFT.Storage","description":"The metaverse is here. Where is it all being stored?","properties":{"type":"blog-post","origins":{"http":"https://nft.storage/blog/post/2021-11-30-hello-world-nft-storage/","ipfs":"ipfs://bafybeieh4gpvatp32iqaacs6xqxqitla4drrkyyzq6dshqqsilkk3fqmti/blog/post/2021-11-30-hello-world-nft-storage/"},"authors":[{"name":"David Choi"}],"content":{"text/markdown":"The last year has witnessed the explosion of NFTs onto the world’s mainstage. From fine art to collectibles to music and media, NFTs are quickly demonstrating just how quickly grassroots Web3 communities can grow, and perhaps how much closer we are to mass adoption than we may have previously thought. <... remaining content omitted ...>"}}}\''
+
+        for (int i = 0; i < tokenList.Count; i++)
+        {
+            string tokenMeta = "{";
+            tokenMeta += "\"name\":\"" + tokenList[i].name + "\",";
+            tokenMeta += "\"description\":\"" + tokenList[i].description + "\",";
+            tokenMeta += "\"image\":\"https://" + ERC1155ImagesCID + ".ipfs.nftstorage.link/image_ID_" + i + ".png\",";
+            tokenMeta += "\"attributes\":" + tokenList[i].attributes + "}";
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(tokenMeta);
+            form.AddBinaryData("file", bodyRaw, "meta_ID_" + i + ".json", "application/json'");
+        }
+        UnityWebRequest www = UnityWebRequest.Post("https://api.nft.storage/upload", form);
+        www.SetRequestHeader("Authorization", "Bearer " + NFTStorageBearerApi);
+        www.SetRequestHeader("accept", "application/json");
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            Debug.Log(www.error);
+        }
+        else
+        {
+            Debug.Log("Metadata:");
+            Debug.Log(www.downloadHandler.text);
+            dynamic objects = JsonConvert.DeserializeObject<dynamic>(www.downloadHandler.text);
+            Debug.Log(objects);
         }
     }
 
@@ -166,7 +203,13 @@ public class UnityWeb3DToolbelt : EditorWindow
     private void DeployToken()
     {
         Debug.Log("NFT Deployer called");
-        //Debug.Log(tmp);
+        Debug.Log(ERC1155ImagesCID);
+        // NO | SI | Si | NO | NO
+        //INVIO NOME NFT | Nome dei TOken | PuntamentoIPFS + CID | PROBABILITa' di MINTING IN % | Quantita' Mintabile
+        //"NOME" "GOLD,SILVER,SWORD" "http://www.google.com" "20" "10"
+        //JsonConvert.SerializeObject<dynamic>(www.downloadHandler.text);
+        //prendo il CID dei JSON e inviuo
+
     }
 
     static Texture2D DeCompress(Texture2D source)
