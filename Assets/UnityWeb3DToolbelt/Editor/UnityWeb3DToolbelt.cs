@@ -18,12 +18,9 @@ using Unity.EditorCoroutines.Editor;
 
 public class UnityWeb3DToolbelt : EditorWindow
 {
-
-    //string[] chain = { "Aurora testnet", "BSC testnet", "Polygon testnet (Mumbai)", "Polkadot testnet", "Avalanche testnet (FUJI)" };
-
-
     ENetworks index;
     string privateKey;
+    string ContractName;
     string account;
     /* 
         NFTDeployment deployContract; */
@@ -31,15 +28,14 @@ public class UnityWeb3DToolbelt : EditorWindow
     string NFTStorageBearerApi;
     GameObject redeemObjTrigger;
     Texture2D texture;
-    bool showMeTheNFT = false;
-    int objectID = 1;
+    float MintPercentage = 0.0f;
+    float MintQuantity = 0.0f;
     string tokenName;
     string tokenSymbol;
     bool includeWalletLoginWidgetInGame = true;
     Texture2D objectToDeploy;
     Texture2D objtdeploy;
-    string stringToEdit = "";
-    bool chainLinkRandomMinterOption = true;
+    bool chainLinkRandomMinterOption = false;
 
 
     List<ERC1155Metadata> tokenList = new List<ERC1155Metadata>();
@@ -58,7 +54,9 @@ public class UnityWeb3DToolbelt : EditorWindow
     void OnGUI()
     {
 
+        GUILayout.BeginVertical(EditorStyles.helpBox);
         index = (ENetworks)EditorGUILayout.EnumPopup("Deploy to:", index);
+        GUILayout.EndVertical();
         GUILayout.Label("");
 
         GUILayout.BeginVertical(EditorStyles.helpBox);
@@ -76,17 +74,25 @@ public class UnityWeb3DToolbelt : EditorWindow
         GUILayout.Label("");
         GUILayout.BeginVertical(EditorStyles.helpBox);
         GUILayout.Label("NFT Builder", EditorStyles.boldLabel);
-        GUILayout.BeginHorizontal();
+        ContractName = EditorGUILayout.TextField("Contract Name", ContractName);
+        GUILayout.Label("");
         GUILayout.Label("ChainLink Integrated Features", EditorStyles.boldLabel);
-        chainLinkRandomMinterOption = EditorGUILayout.Toggle("VRF Token Minter", chainLinkRandomMinterOption);
+        //GUILayout.BeginHorizontal(EditorStyles.toggleGroup);
+        chainLinkRandomMinterOption = EditorGUILayout.BeginToggleGroup("VRF Token Minter", chainLinkRandomMinterOption);
+        if (chainLinkRandomMinterOption)
+        {
+            MintPercentage = EditorGUILayout.FloatField("Probability to mint (%)", MintPercentage);
+            MintQuantity = EditorGUILayout.FloatField("Quantity to mint", MintQuantity);
+        }
+        EditorGUILayout.EndToggleGroup();
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.Toggle("VRF Attributes Value", false);
+        EditorGUILayout.BeginToggleGroup("VRF Attributes Value", false);
+        EditorGUILayout.EndToggleGroup();
         EditorGUI.EndDisabledGroup();
-        GUILayout.EndHorizontal();
 
+        GUILayout.Label("");
         if (GUILayout.Button("Add Asset", GUILayout.ExpandWidth(false)))
         {
-            Debug.Log("Asset Added");
             tokenList.Add(new ERC1155Metadata());
         }
         GUILayout.Label("");
@@ -103,7 +109,6 @@ public class UnityWeb3DToolbelt : EditorWindow
 
             if (GUILayout.Button("Delete Asset", GUILayout.ExpandWidth(false)))
             {
-                Debug.Log("Asset Deleted");
                 tokenList.RemoveAt(i);
             }
 
@@ -114,28 +119,23 @@ public class UnityWeb3DToolbelt : EditorWindow
 
         if (GUILayout.Button("Deploy as NFT"))
         {
-            Debug.Log("Deploy as NFT");
             this.StartCoroutine(ImagesDeployer());
             this.StartCoroutine(MetadataDeployer());
-            //DeployToken();
+            this.StartCoroutine(DeployToken());
         }
 
         GUILayout.EndVertical();
         GUILayout.Label("");
+        GUILayout.BeginVertical(EditorStyles.helpBox);
         GUILayout.Label("In Game Features", EditorStyles.boldLabel);
         includeWalletLoginWidgetInGame = EditorGUILayout.Toggle("Wallet Login Widget", includeWalletLoginWidgetInGame);
+        GUILayout.EndVertical();
 
-    }
-
-    private void NFTReedemer()
-    {
-        Debug.Log("NFT reedemer");
     }
 
     //passare da DeployObject a DeployNFT
     private IEnumerator ImagesDeployer()
     {
-
         WWWForm form = new WWWForm();
 
         for (int i = 0; i < tokenList.Count; i++)
@@ -156,17 +156,13 @@ public class UnityWeb3DToolbelt : EditorWindow
         }
         else
         {
-            Debug.Log("images");
-            Debug.Log(www.downloadHandler.text);
             dynamic objects = JsonConvert.DeserializeObject<dynamic>(www.downloadHandler.text);
-            ERC1155ImagesCID = objects["value"];
-            Debug.Log(ERC1155ImagesCID);
+            ERC1155ImagesCID = objects["value"]["cid"].ToString();
         }
     }
 
     private IEnumerator MetadataDeployer()
     {
-        Debug.Log("MetadataDeployer Started!");
         WWWForm form = new WWWForm();
 
         //'meta=\'{"image":null,"name":"Storing the Worlds Most Valuable Virtual Assets with NFT.Storage","description":"The metaverse is here. Where is it all being stored?","properties":{"type":"blog-post","origins":{"http":"https://nft.storage/blog/post/2021-11-30-hello-world-nft-storage/","ipfs":"ipfs://bafybeieh4gpvatp32iqaacs6xqxqitla4drrkyyzq6dshqqsilkk3fqmti/blog/post/2021-11-30-hello-world-nft-storage/"},"authors":[{"name":"David Choi"}],"content":{"text/markdown":"The last year has witnessed the explosion of NFTs onto the world’s mainstage. From fine art to collectibles to music and media, NFTs are quickly demonstrating just how quickly grassroots Web3 communities can grow, and perhaps how much closer we are to mass adoption than we may have previously thought. <... remaining content omitted ...>"}}}\''
@@ -192,24 +188,35 @@ public class UnityWeb3DToolbelt : EditorWindow
         }
         else
         {
-            Debug.Log("Metadata:");
-            Debug.Log(www.downloadHandler.text);
             dynamic objects = JsonConvert.DeserializeObject<dynamic>(www.downloadHandler.text);
-            Debug.Log(objects);
+            ERC1155CID = objects["value"]["cid"].ToString();
         }
     }
 
     //qui
-    private void DeployToken()
+    private IEnumerator DeployToken()
     {
-        Debug.Log("NFT Deployer called");
-        Debug.Log(ERC1155ImagesCID);
-        // NO | SI | Si | NO | NO
-        //INVIO NOME NFT | Nome dei TOken | PuntamentoIPFS + CID | PROBABILITa' di MINTING IN % | Quantita' Mintabile
-        //"NOME" "GOLD,SILVER,SWORD" "http://www.google.com" "20" "10"
-        //JsonConvert.SerializeObject<dynamic>(www.downloadHandler.text);
-        //prendo il CID dei JSON e inviuo
+        string nameTokenList = "";
+        for (int i = 0; i < tokenList.Count; i++)
+        {
+            nameTokenList += tokenList[i].name;
+            if (i < tokenList.Count - 1)
+            {
+                nameTokenList += ",";
+            }
+        }
+        string request = "http://localhost:8080/generic-webhook-trigger/invoke?NAME=" + ContractName + "&TOKENS_LIST=" + nameTokenList + "&IPFS_ENDPOINT=https://" + ERC1155CID + ".ipfs.nftstorage.link&MINTING_PROBABILITY=" + MintPercentage + "&MINTING_QUANTITY=" + MintQuantity + "&CHAIN_ID=" + networksList.GetChainId(index);
+        UnityWebRequest www = UnityWebRequest.Get(request);
+        yield return www.SendWebRequest();
 
+        if (www.isNetworkError)
+        {
+            Debug.Log("Error While Sending: " + www.error);
+        }
+        else
+        {
+            Debug.Log("NFT Generation in progress");
+        }
     }
 
     static Texture2D DeCompress(Texture2D source)

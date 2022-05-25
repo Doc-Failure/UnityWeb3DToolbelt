@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System; //This allows the IComparable Interface
 using System.Collections.Generic;
 
 class Networks
@@ -25,5 +24,11 @@ class Networks
     public Network GetNetwork(ENetworks networkId)
     {
         return networksList[networkId];
+    }
+
+    public int GetChainId(ENetworks networkId)
+    {
+        Network network = networksList[networkId];
+        return network.GetChainID();
     }
 }
