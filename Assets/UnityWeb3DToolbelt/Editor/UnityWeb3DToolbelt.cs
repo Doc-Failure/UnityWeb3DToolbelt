@@ -36,14 +36,14 @@ public class UnityWeb3DToolbelt : EditorWindow
     Texture2D objectToDeploy;
     Texture2D objtdeploy;
     bool chainLinkRandomMinterOption = false;
-
+    string tmp;
 
     List<ERC1155Metadata> tokenList = new List<ERC1155Metadata>();
     private string ERC1155ImagesCID = "";
     private string ERC1155CID = "";
 
     Networks networksList = new Networks();
-
+    UnityEngine.Vector2 scrollPos;
     byte[] rawData;
     [MenuItem("Web3D Toolbelt Tools/NFT Deployer")]
     public static void ShowWindow()
@@ -53,7 +53,8 @@ public class UnityWeb3DToolbelt : EditorWindow
 
     void OnGUI()
     {
-
+        GUILayout.BeginVertical();
+        scrollPos = GUILayout.BeginScrollView(scrollPos);
         GUILayout.BeginVertical(EditorStyles.helpBox);
         index = (ENetworks)EditorGUILayout.EnumPopup("Deploy to:", index);
         GUILayout.EndVertical();
@@ -88,6 +89,7 @@ public class UnityWeb3DToolbelt : EditorWindow
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.BeginToggleGroup("VRF Attributes Value", false);
         EditorGUILayout.EndToggleGroup();
+        EditorGUI.EndDisabledGroup();
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.BeginToggleGroup("Chainlink Data Feed", false);
         EditorGUILayout.EndToggleGroup();
@@ -126,9 +128,32 @@ public class UnityWeb3DToolbelt : EditorWindow
             this.StartCoroutine(MetadataDeployer());
             this.StartCoroutine(DeployToken());
         }
-
+        if (GUILayout.Button("Download ABI"))
+        { }
         GUILayout.EndVertical();
 
+        GUILayout.Label("");
+        EditorGUI.BeginDisabledGroup(true);
+        GUILayout.BeginVertical(EditorStyles.helpBox);
+        GUILayout.Label("Register new Upkeep", EditorStyles.boldLabel);
+        EditorGUILayout.TextField("Email Address", tmp);
+        EditorGUILayout.TextField("Upkeep name", tmp);
+        EditorGUILayout.TextField("Upkeep address", tmp);
+        EditorGUILayout.TextField("Admin address", tmp);
+        EditorGUILayout.TextField("Gas limit address", tmp);
+        EditorGUILayout.TextField("Starting Balance (Link)", tmp);
+        EditorGUI.EndDisabledGroup();
+        GUILayout.Label("");
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Register Upkeep"))
+        { }
+        if (GUILayout.Button("Cancel"))
+        { }
+        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+
+        GUILayout.EndScrollView();
+        GUILayout.EndVertical();
     }
 
     //passare da DeployObject a DeployNFT

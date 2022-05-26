@@ -25,7 +25,7 @@ public class ContractConsumerEditor : Editor
         //lookAtPoint = serializedObject.FindProperty("lookAtPoint");
         Debug.Log(ContractJson.objectReferenceValue);
 
-        contract = (Contract)ContractJson.objectReferenceValue.ToObject<Contract>();
+        //contract = (Contract)ContractJson.objectReferenceValue.ToObject<Contract>();
         //decodedABI = root["abi"].ToObject<List<DecodedABI>>();
 
     }
