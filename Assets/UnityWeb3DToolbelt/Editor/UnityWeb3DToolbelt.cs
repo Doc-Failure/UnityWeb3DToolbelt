@@ -88,6 +88,9 @@ public class UnityWeb3DToolbelt : EditorWindow
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.BeginToggleGroup("VRF Attributes Value", false);
         EditorGUILayout.EndToggleGroup();
+        EditorGUI.BeginDisabledGroup(true);
+        EditorGUILayout.BeginToggleGroup("Chainlink Data Feed", false);
+        EditorGUILayout.EndToggleGroup();
         EditorGUI.EndDisabledGroup();
 
         GUILayout.Label("");
@@ -124,11 +127,6 @@ public class UnityWeb3DToolbelt : EditorWindow
             this.StartCoroutine(DeployToken());
         }
 
-        GUILayout.EndVertical();
-        GUILayout.Label("");
-        GUILayout.BeginVertical(EditorStyles.helpBox);
-        GUILayout.Label("In Game Features", EditorStyles.boldLabel);
-        includeWalletLoginWidgetInGame = EditorGUILayout.Toggle("Wallet Login Widget", includeWalletLoginWidgetInGame);
         GUILayout.EndVertical();
 
     }
