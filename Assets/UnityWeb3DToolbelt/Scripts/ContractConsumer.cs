@@ -28,8 +28,8 @@ public class ContractConsumer : MonoBehaviour
 
     public TextAsset ContractJson;
     public InputField privateKey;
-    public bool onStart, onUpdate, onClick, onCollision;
-    public string onStartFunction, onUpdateFunction, onClickFunction, onCollisionFunction;
+    public bool onStart, onUpdate, onClick, onCollision = false;
+    public string onStartFunction, onUpdateFunction, onClickFunction, onCollisionFunction = "";
     public string abi = "";
     ENetworks index;
     public Contract contract;
@@ -48,6 +48,7 @@ public class ContractConsumer : MonoBehaviour
     {
         if (onClick && Input.GetMouseButtonDown(0))
         {
+            Debug.Log(onClickFunction);
             web3Req(onClickFunction);
         }
         //Se click faccio qualcosa
@@ -64,7 +65,7 @@ public class ContractConsumer : MonoBehaviour
         var web3 = new Web3(account, url);
         var contractConnector = web3.Eth.GetContract(abi, contract.address);
         var function = contractConnector.GetFunction(functionName);
-        var result = await function.CallAsync<string>();
+        var result = await function.CallAsync<string>("0");
         Debug.Log(result);
     }
 

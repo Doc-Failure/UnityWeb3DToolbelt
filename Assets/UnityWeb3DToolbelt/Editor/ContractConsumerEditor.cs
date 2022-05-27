@@ -44,6 +44,22 @@ public class ContractConsumerEditor : Editor
         for (int i = 0; i < data.Count; i++)
         {
             options[i] = data[i].name;
+            if (data[i].name == onStartFunction.stringValue)
+            {
+                onStartSelected = i;
+            }
+            if (data[i].name == onClickFunction.stringValue)
+            {
+                onClickSelected = i;
+            }
+            if (data[i].name == onUpdateFunction.stringValue)
+            {
+                onUpdateSelected = i;
+            }
+            if (data[i].name == onCollisionFunction.stringValue)
+            {
+                onCollisionSelected = i;
+            }
         }
 
         /*
@@ -65,11 +81,11 @@ public class ContractConsumerEditor : Editor
         {
             EditorGUI.BeginChangeCheck();
             onStartSelected = EditorGUILayout.Popup("Function", onStartSelected, options);
-            if (EditorGUI.EndChangeCheck())
-            {
-                onStartFunction.stringValue = options[onStartSelected];
-                serializedObject.ApplyModifiedProperties();
-            }
+            /* if (EditorGUI.EndChangeCheck())
+            { */
+            onStartFunction.stringValue = options[onStartSelected];
+            /*  serializedObject.ApplyModifiedProperties();
+         } */
             functionParams = EditorGUILayout.TextField("Params", functionParams);
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
