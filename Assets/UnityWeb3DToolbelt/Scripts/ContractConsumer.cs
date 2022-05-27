@@ -28,11 +28,11 @@ public class ContractConsumer : MonoBehaviour
 
     public TextAsset ContractJson;
     public InputField privateKey;
-    public bool onStart, onUpdate, onClick, onCollision = false;
-    public string onStartFunction, onUpdateFunction, onClickFunction = "";
-    string abi = "";
+    public bool onStart, onUpdate, onClick, onCollision;
+    public string onStartFunction, onUpdateFunction, onClickFunction, onCollisionFunction;
+    public string abi = "";
     ENetworks index;
-    Contract contract;
+    public Contract contract;
 
     void Start()
     {
@@ -46,9 +46,9 @@ public class ContractConsumer : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (onClick && Input.GetMouseButtonDown(0))
         {
-            web3Req("name");
+            web3Req(onClickFunction);
         }
         //Se click faccio qualcosa
         //Se collizione faccio altro???
@@ -69,11 +69,11 @@ public class ContractConsumer : MonoBehaviour
     }
 
     void OnGUI()
-    {
+    {/* 
         if (GUI.Button(new Rect(10, 10, 150, 100), "I am a button"))
         {
             print("You clicked the button!");
-        }
+        } */
     }
 
 }

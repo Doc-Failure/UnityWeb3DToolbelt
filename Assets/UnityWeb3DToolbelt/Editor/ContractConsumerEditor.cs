@@ -1,69 +1,120 @@
 //C# Example (LookAtPointEditor.cs)
-using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Numerics;
+using System.Text;
 using UnityEditor;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Unity.EditorCoroutines.Editor;
 
 [CustomEditor(typeof(ContractConsumer))]
 [CanEditMultipleObjects]
 public class ContractConsumerEditor : Editor
 {
-    public SerializedProperty ContractJson, privateKey, onStart, onUpdate, onClick, onCollision, index, onStartFunction, onUpdateFunction, onClickFunction;
+    public SerializedProperty ContractJson, privateKey, onStart, onUpdate, onClick, onCollision, index, onStartFunction, onUpdateFunction, onClickFunction, onCollisionFunction, abi;
     ENetworks indexSelector;
-    string functionToCall;
     string functionParams;
-    Contract contract;
+    List<DecodedABI> decodedABI = new List<DecodedABI>();
 
+
+    int onStartSelected, onUpdateSelected, onClickSelected, onCollisionSelected;
+    string[] options;// = new List<string>();
 
     void OnEnable()
     {
-        //index = serializedObject.FindProperty("index");
         ContractJson = serializedObject.FindProperty("ContractJson");
         privateKey = serializedObject.FindProperty("privateKey");
         onStart = serializedObject.FindProperty("onStart");
         onUpdate = serializedObject.FindProperty("onUpdate");
         onClick = serializedObject.FindProperty("onClick");
         onCollision = serializedObject.FindProperty("onCollision");
-        //lookAtPoint = serializedObject.FindProperty("lookAtPoint");
-        Debug.Log(ContractJson.objectReferenceValue);
+        abi = serializedObject.FindProperty("abi");
+        onStartFunction = serializedObject.FindProperty("onStartFunction");
+        onClickFunction = serializedObject.FindProperty("onClickFunction");
+        onUpdateFunction = serializedObject.FindProperty("onUpdateFunction");
+        onCollisionFunction = serializedObject.FindProperty("onCollisionFunction");
 
-        //contract = (Contract)ContractJson.objectReferenceValue.ToObject<Contract>();
-        //decodedABI = root["abi"].ToObject<List<DecodedABI>>();
+        List<DecodedABI> data = Newtonsoft.Json.JsonConvert.DeserializeObject<List<DecodedABI>>(abi.stringValue);
+        options = new string[data.Count];
+        for (int i = 0; i < data.Count; i++)
+        {
+            options[i] = data[i].name;
+        }
+
+        /*
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+            index = (ENetworks)EditorGUILayout.EnumPopup("Deploy to:", index);
+            GUILayout.EndVertical();
+        */
 
     }
 
     public override void OnInspectorGUI()
     {
-        /* GUILayout.BeginVertical();
-        indexSelector = (ENetworks)EditorGUILayout.EnumPopup("Deploy to:", indexSelector);
-        GUILayout.EndVertical(); */
-
         serializedObject.Update();
-        //EditorGUILayout.PropertyField(index);
         EditorGUILayout.PropertyField(ContractJson);
         EditorGUILayout.PropertyField(privateKey);
-        EditorGUILayout.PropertyField(onStart);
+
+        onStart.boolValue = EditorGUILayout.BeginFoldoutHeaderGroup(onStart.boolValue, "Call Function On Start");
         if (onStart.boolValue)
         {
-            functionToCall = EditorGUILayout.TextField("On Start Function", functionToCall);
+            EditorGUI.BeginChangeCheck();
+            onStartSelected = EditorGUILayout.Popup("Function", onStartSelected, options);
+            if (EditorGUI.EndChangeCheck())
+            {
+                onStartFunction.stringValue = options[onStartSelected];
+                serializedObject.ApplyModifiedProperties();
+            }
             functionParams = EditorGUILayout.TextField("Params", functionParams);
         }
-        EditorGUILayout.PropertyField(onUpdate);
+        EditorGUILayout.EndFoldoutHeaderGroup();
+
+        onUpdate.boolValue = EditorGUILayout.BeginFoldoutHeaderGroup(onUpdate.boolValue, "Call Function On Update");
         if (onUpdate.boolValue)
         {
-            functionToCall = EditorGUILayout.TextField("On Update Function", functionToCall);
+            EditorGUI.BeginChangeCheck();
+            onUpdateSelected = EditorGUILayout.Popup("Function", onUpdateSelected, options);
+            if (EditorGUI.EndChangeCheck())
+            {
+                onUpdateFunction.stringValue = options[onUpdateSelected];
+            }
             functionParams = EditorGUILayout.TextField("Params", functionParams);
         }
-        EditorGUILayout.PropertyField(onClick);
+        EditorGUILayout.EndFoldoutHeaderGroup();
+
+
+        onClick.boolValue = EditorGUILayout.BeginFoldoutHeaderGroup(onClick.boolValue, "Call Function On Click");
         if (onClick.boolValue)
         {
-            functionToCall = EditorGUILayout.TextField("On Click Function", functionToCall);
+            EditorGUI.BeginChangeCheck();
+            onClickSelected = EditorGUILayout.Popup("Function", onClickSelected, options);
+            if (EditorGUI.EndChangeCheck())
+            {
+                onClickFunction.stringValue = options[onClickSelected];
+            }
             functionParams = EditorGUILayout.TextField("Params", functionParams);
         }
-        EditorGUILayout.PropertyField(onCollision);
+        EditorGUILayout.EndFoldoutHeaderGroup();
+
+
+
+        onCollision.boolValue = EditorGUILayout.BeginFoldoutHeaderGroup(onCollision.boolValue, "Call Function On Collision");
         if (onCollision.boolValue)
         {
-            functionToCall = EditorGUILayout.TextField("On Click Function", functionToCall);
+            EditorGUI.BeginChangeCheck();
+            onCollisionSelected = EditorGUILayout.Popup("Function", onCollisionSelected, options);
+            if (EditorGUI.EndChangeCheck())
+            {
+                onCollisionFunction.stringValue = options[onCollisionSelected];
+            }
             functionParams = EditorGUILayout.TextField("Params", functionParams);
         }
+        EditorGUILayout.EndFoldoutHeaderGroup();
         serializedObject.ApplyModifiedProperties();
     }
 }
