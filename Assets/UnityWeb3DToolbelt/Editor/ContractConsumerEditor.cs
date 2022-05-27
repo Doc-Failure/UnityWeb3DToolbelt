@@ -16,7 +16,7 @@ using Unity.EditorCoroutines.Editor;
 [CanEditMultipleObjects]
 public class ContractConsumerEditor : Editor
 {
-    public SerializedProperty ContractJson, privateKey, onStart, onUpdate, onClick, onCollision, index, onStartFunction, onUpdateFunction, onClickFunction, onCollisionFunction, abi;
+    public SerializedProperty ContractJson, privateKey, onStart, onUpdate, onClick, onCollision, index, onStartFunction, onUpdateFunction, onClickFunction, onCollisionFunction, abi, onClickParameters;
     ENetworks indexSelector;
     string functionParams;
     List<DecodedABI> decodedABI = new List<DecodedABI>();
@@ -38,6 +38,7 @@ public class ContractConsumerEditor : Editor
         onClickFunction = serializedObject.FindProperty("onClickFunction");
         onUpdateFunction = serializedObject.FindProperty("onUpdateFunction");
         onCollisionFunction = serializedObject.FindProperty("onCollisionFunction");
+        onClickParameters = serializedObject.FindProperty("onClickParameters");
 
         List<DecodedABI> data = Newtonsoft.Json.JsonConvert.DeserializeObject<List<DecodedABI>>(abi.stringValue);
         options = new string[data.Count];
@@ -113,7 +114,7 @@ public class ContractConsumerEditor : Editor
             {
                 onClickFunction.stringValue = options[onClickSelected];
             }
-            functionParams = EditorGUILayout.TextField("Params", functionParams);
+            onClickParameters.stringValue = EditorGUILayout.TextField("Params", onClickParameters.stringValue);
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
 
